@@ -16,7 +16,7 @@
             "cwd": "${workspaceFolder:AoC-Swift-2024}",
             "name": "Release AdventOfCode",
             "program": "${workspaceFolder:AoC-Swift-2024}/.build/release/AdventOfCode",
-            "preLaunchTask": "swift: Build Release AdventOfCode"
+            "preLaunchTask": "swift: Build Release AdventOfCode",
         }
     ]
 }
