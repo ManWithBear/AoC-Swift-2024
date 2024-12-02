@@ -1,0 +1,29 @@
+#!/bin/zsh
+
+# Check if day parameter is provided
+if [ $# -eq 0 ]; then
+    echo "Please provide a day number as parameter"
+    exit 1
+fi
+
+# Format day number with leading zero
+day=$(printf "%02d" $1)
+
+# Create source file from template
+cp Sources/Day00.swift "Sources/Day$day.swift"
+sed -i '' "s/Day00/Day$day/g" "Sources/Day$day.swift"
+
+# Create test file from template
+cp Tests/Day00.swift "Tests/Day$day.swift"
+sed -i '' "s/Day00/Day$day/g" "Tests/Day$day.swift"
+
+# Create empty data file
+touch "Sources/Data/Day$day.txt"
+
+echo "Created files for Day $day:"
+echo "- Sources/Day$day.swift"
+echo "- Tests/Day$day.swift"
+echo "- Sources/Data/Day$day.txt"
+
+# Remind to add the new day to allChallenges
+echo -e "\nRemember to add Day$day() to allChallenges array in Sources/AdventOfCode.swift"

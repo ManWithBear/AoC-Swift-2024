@@ -1,0 +1,42 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "swift-plugin",
+			"command": "lint-source-code",
+			"args": [],
+			"disableSandbox": false,
+			"allowWritingToPackageDirectory": false,
+			"disableTaskQueue": false,
+			"problemMatcher": [],
+			"label": "swift-plugin: Lint Source Code",
+			"detail": "swift package lint-source-code"
+		},
+		{
+			"type": "swift-plugin",
+			"command": "format-source-code",
+			"args": [],
+			"disableSandbox": false,
+			"allowWritingToPackageDirectory": false,
+			"disableTaskQueue": false,
+			"problemMatcher": [],
+			"label": "swift-plugin: Format Source Code",
+			"detail": "swift package format-source-code --allow-writing-to-package-directory"
+		},
+		{
+			"type": "shell",
+			"command": "./add_day",
+			"args": ["${input:day}"],
+			"problemMatcher": [],
+			"label": "Generate new day files",
+			"detail": "add_day $day",
+		}
+	],
+	"inputs": [
+		{
+			"type": "promptString",
+			"id": "day",
+			"description": "Enter the day number"
+		}
+	]
+}
