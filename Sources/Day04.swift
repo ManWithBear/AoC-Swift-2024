@@ -118,8 +118,44 @@ struct Day04: AdventDay {
         return count
     }
 
+    func isX_MAS(at index: (y: Int, x: Int)) -> Bool {
+        guard characters[index.y][index.x] == Letter.a else {
+            return false
+        }
+        guard index.y - 1 >= 0 && index.x - 1 >= 0 else {
+            return false
+        }
+        guard index.y + 1 < height && index.x + 1 < width else {
+            return false
+        }
+        let isNW_M = characters[index.y - 1][index.x - 1] == Letter.m
+        let isNW_S = characters[index.y - 1][index.x - 1] == Letter.s
+
+        let isNE_M = characters[index.y - 1][index.x + 1] == Letter.m
+        let isNE_S = characters[index.y - 1][index.x + 1] == Letter.s
+
+        let isSE_M = characters[index.y + 1][index.x + 1] == Letter.m
+        let isSE_S = characters[index.y + 1][index.x + 1] == Letter.s
+
+        let isSW_M = characters[index.y + 1][index.x - 1] == Letter.m
+        let isSW_S = characters[index.y + 1][index.x - 1] == Letter.s
+
+        let isNW_SE = (isNW_M && isSE_S) || (isNW_S && isSE_M)
+        let isNE_SW = (isNE_M && isSW_S) || (isNE_S && isSW_M)
+
+        return isNW_SE && isNE_SW
+    }
+
     // Replace this with your solution for the second part of the day's challenge.
     func part2() -> Any {
-        -1
+        var count = 0
+        for y in 0..<height {
+            for x in 0..<width {
+                if isX_MAS(at: (y, x)) {
+                    count += 1
+                }
+            }
+        }
+        return count
     }
 }
