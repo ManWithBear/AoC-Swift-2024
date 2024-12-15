@@ -81,6 +81,45 @@ struct Day09: AdventDay {
 
     // Replace this with your solution for the second part of the day's challenge.
     func part2() -> Any {
-        -1
+        // 10064434267399 is too high
+        struct DataBlock {
+            var size: Int
+            var index: Int
+            var id: Int
+        }
+        var blocks = self.blocks.reduce((idx: 0, isDataBlock: true, blocks: [DataBlock]())) {
+            acc, block in
+            var index = acc.idx
+            var blocks = acc.blocks
+            if acc.isDataBlock {
+                blocks.append(DataBlock(size: block, index: index, id: blocks.count))
+            }
+            index += block
+            return (index, !acc.isDataBlock, blocks)
+        }.blocks
+
+        var tailPointer = blocks.count - 1
+        while tailPointer > 0 {
+            var block = blocks[tailPointer]
+            var headPointer = 0
+            while headPointer < tailPointer {
+                let headBlock = blocks[headPointer]
+                let nextHeadBlock = blocks[headPointer + 1]
+                let space = nextHeadBlock.index - (headBlock.index + headBlock.size)
+                if space >= block.size {
+                    block.index = headBlock.index + headBlock.size
+                    blocks.remove(at: tailPointer)
+                    blocks.insert(block, at: headPointer + 1)
+                    tailPointer += 1  // after a shift the tail pointer is pointing to the next block (counter -1 outside the loop)
+                    break
+                }
+                headPointer += 1
+            }
+            tailPointer -= 1
+        }
+
+        return blocks.reduce(0) { acc, block in
+            acc + sumSequence(start: block.index, count: block.size, d: 1) * block.id
+        }
     }
 }
