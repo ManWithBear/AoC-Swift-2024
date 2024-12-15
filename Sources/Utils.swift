@@ -7,3 +7,7 @@ extension Point: CustomStringConvertible {
         "(\(x), \(y))"
     }
 }
+
+func numberOfDigits(in number: Int) -> Int {
+    String(number).count
+}
