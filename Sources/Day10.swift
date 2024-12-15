@@ -81,6 +81,40 @@ struct Day10: AdventDay {
 
     // Replace this with your solution for the second part of the day's challenge.
     func part2() -> Any {
-        -1
+        var ratings: [Point: Int] = [:]
+        var queue: [Point] = []
+        var zeroes: [Point] = []
+        for y in 0..<height {
+            for x in 0..<width {
+                let point = Point(x: x, y: y)
+                if height(for: point) == 9 {
+                    queue.append(point)
+                    ratings[point] = 1
+                }
+                if height(for: point) == 0 {
+                    zeroes.append(point)
+                }
+            }
+        }
+        var visited = Set(queue + zeroes)
+        while !queue.isEmpty {
+            let point = queue.removeFirst()
+            let pointsHeight = height(for: point)
+            let pointsRating = ratings[point]!
+            func check(neighbour: Point?) {
+                guard let neighbour else { return }
+                guard height(for: neighbour) + 1 == pointsHeight else { return }
+                ratings[neighbour, default: 0] += pointsRating
+                if !visited.contains(neighbour) {
+                    visited.insert(neighbour)
+                    queue.append(neighbour)
+                }
+            }
+            check(neighbour: getTopNeighbour(for: point))
+            check(neighbour: getBottomNeighbour(for: point))
+            check(neighbour: getLeftNeighbour(for: point))
+            check(neighbour: getRightNeighbour(for: point))
+        }
+        return zeroes.reduce(0) { $0 + ratings[$1]! }
     }
 }
