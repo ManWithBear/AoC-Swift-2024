@@ -1,5 +1,18 @@
 import Algorithms
 
+enum Side {
+    case top
+    case bottom
+    case left
+    case right
+}
+
+struct Edge {
+    var from: Point
+    var to: Point
+    var side: Side
+}
+
 struct Day12: AdventDay {
     // Save your data in a corresponding text file in the `Data` directory.
     var data: String
@@ -87,8 +100,104 @@ struct Day12: AdventDay {
         }.reduce(0, +)
     }
 
+    func joinEdges(edges: [Edge]) -> [Edge] {
+        var top: [Int: [Edge]] = [:]
+        var bottom: [Int: [Edge]] = [:]
+        var left: [Int: [Edge]] = [:]
+        var right: [Int: [Edge]] = [:]
+        for edge in edges {
+            switch edge.side {
+            case .top: top[edge.from.y, default: []].append(edge)
+            case .bottom: bottom[edge.from.y, default: []].append(edge)
+            case .left: left[edge.from.x, default: []].append(edge)
+            case .right: right[edge.from.x, default: []].append(edge)
+            }
+        }
+        func join(edges: [Edge], path: KeyPath<Point, Int>) -> [Edge] {
+            return
+                edges
+                .sorted { $0.from[keyPath: path] < $1.from[keyPath: path] }
+                .reduce(into: [Edge]()) { acc, edge in
+                    guard let last = acc.last else {
+                        acc.append(edge)
+                        return
+                    }
+                    if last.to[keyPath: path] + 1 == edge.from[keyPath: path] {
+                        acc.removeLast()
+                        acc.append(Edge(from: last.from, to: edge.to, side: edge.side))
+                    } else {
+                        acc.append(edge)
+                    }
+                }
+        }
+        let joinedTops = top.mapValues { join(edges: $0, path: \.x) }
+            .values
+            .flatMap { $0 }
+        let joinedBottoms = bottom.mapValues { join(edges: $0, path: \.x) }
+            .values
+            .flatMap { $0 }
+        let joinedLefts = left.mapValues { join(edges: $0, path: \.y) }
+            .values
+            .flatMap { $0 }
+        let joinedRights = right.mapValues { join(edges: $0, path: \.y) }
+            .values
+            .flatMap { $0 }
+        return joinedTops + joinedBottoms + joinedLefts + joinedRights
+    }
+
     // Replace this with your solution for the second part of the day's challenge.
     func part2() -> Any {
-        -1
+        typealias PlotIndex = Int
+        var theNextIndex = 0
+        var area: [PlotIndex: Int] = [:]
+        var edges: [PlotIndex: [Edge]] = [:]
+        var toVisit: Set<Point> = {
+            let points = grid.indices.flatMap { y in
+                grid[y].indices.map { x in
+                    Point(x: x, y: y)
+                }
+            }
+            return Set(points)
+        }()
+        while !toVisit.isEmpty {
+            let startingPoint = toVisit.removeFirst()
+            let char = grid[startingPoint.y][startingPoint.x]
+            let index = theNextIndex
+            theNextIndex += 1
+            area[index] = 0
+            edges[index] = []
+            var queue: [Point] = [startingPoint]
+            while !queue.isEmpty {
+                let point = queue.removeFirst()
+                area[index]! += 1
+                func checkNeighbour(_ neighbour: Point?, _ side: Side) {
+                    let edge = Edge(from: point, to: point, side: side)
+                    guard let neighbour else {
+                        // we need boundsary when on the edge
+                        edges[index]!.append(edge)
+                        return
+                    }
+                    if grid[neighbour.y][neighbour.x] == char {
+                        guard toVisit.contains(neighbour) else { return }
+                        // the same plot
+                        toVisit.remove(neighbour)
+                        queue.append(neighbour)
+                    } else {
+                        // different plot
+                        edges[index]!.append(edge)
+                    }
+                }
+                checkNeighbour(getTopNeighbour(for: point), .top)
+                checkNeighbour(getBottomNeighbour(for: point), .bottom)
+                checkNeighbour(getLeftNeighbour(for: point), .left)
+                checkNeighbour(getRightNeighbour(for: point), .right)
+            }
+        }
+        for index in 0..<theNextIndex {
+            edges[index] = joinEdges(edges: edges[index]!)
+        }
+        return (0..<theNextIndex).map { index in
+            area[index]! * edges[index]!.count
+        }.reduce(0, +)
     }
 }
