@@ -1,15 +1,5 @@
 import Algorithms
 
-struct Point: Hashable {
-    let x: Int
-    let y: Int
-}
-extension Point: CustomStringConvertible {
-    var description: String {
-        "(\(x), \(y))"
-    }
-}
-
 struct Day08: AdventDay {
     // Save your data in a corresponding text file in the `Data` directory.
     var data: String
