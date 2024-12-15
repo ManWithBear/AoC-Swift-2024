@@ -14,34 +14,41 @@ struct Day11: AdventDay {
         }
     }
 
-    // Replace this with your solution for the first part of the day's challenge.
-    func part1() -> Any {
-        var stones = initialStones
-        for _ in 0..<25 {
-            var newStones: [Int: Int] = [:]
-            for (stone, count) in stones {
-                if stone == 0 {
-                    newStones[1, default: 0] += count
-                    continue
-                }
-                let digitsCount = numberOfDigits(in: stone)
-                if digitsCount.isMultiple(of: 2) {
-                    let separator = (0..<digitsCount / 2).reduce(1) { acc, _ in acc * 10 }
-                    let top = stone / separator
-                    let bottom = stone % separator
-                    newStones[top, default: 0] += count
-                    newStones[bottom, default: 0] += count
-                    continue
-                }
-                newStones[stone * 2024, default: 0] += count
+    func blink(stones: [Int: Int]) -> [Int: Int] {
+        var newStones: [Int: Int] = [:]
+        for (stone, count) in stones {
+            if stone == 0 {
+                newStones[1, default: 0] += count
+                continue
             }
-            stones = newStones
+            let digitsCount = numberOfDigits(in: stone)
+            if digitsCount.isMultiple(of: 2) {
+                let separator = (0..<digitsCount / 2).reduce(1) { acc, _ in acc * 10 }
+                let top = stone / separator
+                let bottom = stone % separator
+                newStones[top, default: 0] += count
+                newStones[bottom, default: 0] += count
+                continue
+            }
+            newStones[stone * 2024, default: 0] += count
+        }
+        return newStones
+    }
+
+    func sumStonesAfterBlinking(_ times: Int) -> Int {
+        var stones = initialStones
+        for _ in 0..<times {
+            stones = blink(stones: stones)
         }
         return stones.values.reduce(0, +)
     }
 
+    func part1() -> Any {
+        return sumStonesAfterBlinking(25)
+    }
+
     // Replace this with your solution for the second part of the day's challenge.
     func part2() -> Any {
-        -1
+        return sumStonesAfterBlinking(75)
     }
 }
