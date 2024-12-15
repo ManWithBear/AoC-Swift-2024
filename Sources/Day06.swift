@@ -31,27 +31,13 @@ enum Cell: Equatable {
         self = .visited(visited.union(direction.toVisited))
     }
 }
-enum Direction: Character {
-    case north = "^"
-    case east = ">"
-    case south = "v"
-    case west = "<"
-
+extension Direction {
     var toVisited: Visited {
         switch self {
         case .north: return .fromSouth
         case .east: return .fromWest
         case .south: return .fromNorth
         case .west: return .fromEast
-        }
-    }
-
-    func turnRight() -> Direction {
-        switch self {
-        case .north: return .east
-        case .east: return .south
-        case .south: return .west
-        case .west: return .north
         }
     }
 
