@@ -49,6 +49,13 @@ struct Day13: AdventDay {
             let b = b_numerator / b_denominator
             return a * 3 + b
         }
+
+        func shiftForPart2() -> Self {
+            var machine = self
+            machine.X_p += 10_000_000_000_000
+            machine.Y_p += 10_000_000_000_000
+            return machine
+        }
     }
 
     // Save your data in a corresponding text file in the `Data` directory.
@@ -67,6 +74,8 @@ struct Day13: AdventDay {
 
     // Replace this with your solution for the second part of the day's challenge.
     func part2() -> Any {
-        -1
+        return machines.map { $0.shiftForPart2() }
+            .map { $0.solveForA() }
+            .reduce(0, +)
     }
 }
