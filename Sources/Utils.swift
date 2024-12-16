@@ -35,6 +35,15 @@ enum Direction {
         case .west: return .north
         }
     }
+
+    func turnLeft() -> Self {
+        switch self {
+        case .north: return .west
+        case .east: return .north
+        case .south: return .east
+        case .west: return .south
+        }
+    }
 }
 
 struct Point: Hashable {
