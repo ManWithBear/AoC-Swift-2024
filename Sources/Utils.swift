@@ -23,6 +23,10 @@ enum Direction {
         }
     }
 
+    var isHorizontal: Bool {
+        self == .east || self == .west
+    }
+
     func turnRight() -> Self {
         switch self {
         case .north: return .east
