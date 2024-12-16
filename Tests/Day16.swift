@@ -53,7 +53,7 @@ struct Day16Tests {
         #expect(String(describing: challenge.part1()) == "11048")
     }
 
-    @Test func testPart2() async throws {
+    @Test func testPart2_small() async throws {
         let testData = """
             ###############
             #.......#....E#
@@ -72,6 +72,30 @@ struct Day16Tests {
             ###############
             """
         let challenge = Day16(data: testData)
-        #expect(String(describing: challenge.part2()) == "32000")
+        #expect(String(describing: challenge.part2()) == "45")
+    }
+
+    @Test func testPart2_large() async throws {
+        let testData = """
+            #################
+            #...#...#...#..E#
+            #.#.#.#.#.#.#.#.#
+            #.#.#.#...#...#.#
+            #.#.#.#.###.#.#.#
+            #...#.#.#.....#.#
+            #.#.#.#.#.#####.#
+            #.#...#.#.#.....#
+            #.#.#####.#.###.#
+            #.#.#.......#...#
+            #.#.###.#####.###
+            #.#.#...#.....#.#
+            #.#.#.#####.###.#
+            #.#.#.........#.#
+            #.#.#.#########.#
+            #S#.............#
+            #################
+            """
+        let challenge = Day16(data: testData)
+        #expect(String(describing: challenge.part2()) == "64")
     }
 }

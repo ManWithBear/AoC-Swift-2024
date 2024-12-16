@@ -26,22 +26,46 @@ struct Day16: AdventDay {
         self.maze[end] = .empty
     }
 
-    // Replace this with your solution for the first part of the day's challenge.
-    func part1() -> Any {
-        struct Step: Hashable {
-            var position: Point
-            var direction: Direction
-        }
-        struct ValuedStep: Hashable, Comparable {
-            var step: Step
-            var position: Point { step.position }
-            var direction: Direction { step.direction }
-            var value: Int
+    struct Step: Hashable {
+        var position: Point
+        var direction: Direction
+    }
+    struct ValuedStep: Hashable, Comparable {
+        var step: Step
+        var position: Point { step.position }
+        var direction: Direction { step.direction }
+        var value: Int
 
-            static func < (lhs: ValuedStep, rhs: ValuedStep) -> Bool {
-                lhs.value < rhs.value
-            }
+        static func < (lhs: ValuedStep, rhs: ValuedStep) -> Bool {
+            lhs.value < rhs.value
         }
+        func stepForward() -> ValuedStep {
+            ValuedStep(
+                step: Step(position: position + direction.vector, direction: direction),
+                value: value + 1
+            )
+        }
+        func barrelRoll() -> ValuedStep {
+            ValuedStep(
+                step: Step(position: position, direction: direction.turnRight().turnRight()),
+                value: value
+            )
+        }
+        func turnRight() -> ValuedStep {
+            ValuedStep(
+                step: Step(position: position, direction: direction.turnRight()),
+                value: value + 1000
+            )
+        }
+        func turnLeft() -> ValuedStep {
+            ValuedStep(
+                step: Step(position: position, direction: direction.turnLeft()),
+                value: value + 1000
+            )
+        }
+    }
+
+    func evaluateGrid() -> [Step: Int] {
         var heap = Heap<ValuedStep>()
         let startStep = Step(position: start, direction: .east)
         var visited: [Step: Int] = [startStep: 0]
@@ -49,7 +73,7 @@ struct Day16: AdventDay {
 
         @discardableResult
         func tryStep(_ step: ValuedStep) -> Bool {
-            if let visitedValue = visited[step.step], visitedValue >= step.value {
+            if let visitedValue = visited[step.step], visitedValue <= step.value {
                 // we already visited this step with a shorter path
                 return false
             }
@@ -57,52 +81,59 @@ struct Day16: AdventDay {
             heap.insert(step)
             return true
         }
+        var bestValue = Int.max
         while !heap.isEmpty {
             let current = heap.removeMin()
+            if current.value > bestValue { continue }
 
-            let stepForward = ValuedStep(
-                step: Step(
-                    position: current.position + current.direction.vector,
-                    direction: current.direction
-                ),
-                value: current.value + 1
-            )
+            let stepForward = current.stepForward()
             if stepForward.position == end {
-                return stepForward.value
+                bestValue = min(bestValue, stepForward.value)
+                continue
             }
             if maze[stepForward.position] != .wall {
                 if tryStep(stepForward) {
-                    let step180 = Step(
-                        position: stepForward.position,
-                        direction: stepForward.direction.turnLeft().turnLeft()
-                    )
-                    visited[step180] = stepForward.value  // why would you go back?
+                    visited[stepForward.barrelRoll().step] = stepForward.value  // why would you go back?
                 }
             }
-
-            let turnRight = ValuedStep(
-                step: Step(
-                    position: current.position,
-                    direction: current.direction.turnRight()
-                ),
-                value: current.value + 1000
-            )
-            tryStep(turnRight)
-
-            let turnLeft = ValuedStep(
-                step: Step(
-                    position: current.position,
-                    direction: current.direction.turnLeft()
-                ),
-                value: current.value + 1000
-            )
-            tryStep(turnLeft)
+            tryStep(current.turnRight())
+            tryStep(current.turnLeft())
         }
-        return -1
+        visited[Step(position: end, direction: .east)] = bestValue
+        visited[Step(position: end, direction: .west)] = bestValue
+        visited[Step(position: end, direction: .north)] = bestValue
+        visited[Step(position: end, direction: .south)] = bestValue
+        return visited
+    }
+
+    // Replace this with your solution for the first part of the day's challenge.
+    func part1() -> Any {
+        let visited = evaluateGrid()
+        return visited[Step(position: end, direction: .east)]!
     }
 
     // Replace this with your solution for the second part of the day's challenge.
     func part2() -> Any {
-        -1
+        let visited = evaluateGrid()
+        var sits = Set([end])
+
+        var queue = Deque<Step>([
+            Step(position: end, direction: .east)
+        ])
+        while !queue.isEmpty {
+            let current = queue.removeFirst()
+            sits.insert(current.position)
+            if current.position == start { continue }
+            let value = visited[current]!
+            let neighbors = Direction.allCases
+                .map { Step(position: current.position + $0.vector, direction: $0) }
+                .filter { maze[$0.position] != .wall }
+                .filter {
+                    guard let visitedValue = visited[$0] else { return false }
+                    return visitedValue == value - 1 || visitedValue == value - 1001
+                }
+            queue.append(contentsOf: neighbors)
+        }
+        return sits.count
     }
 }
