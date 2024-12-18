@@ -55,6 +55,15 @@ struct Point: Hashable {
     static func + (lhs: Point, rhs: Point) -> Point {
         Point(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
     }
+
+    var neighbors4: [Point] {
+        [
+            Point(x: x - 1, y: y),
+            Point(x: x + 1, y: y),
+            Point(x: x, y: y - 1),
+            Point(x: x, y: y + 1),
+        ]
+    }
 }
 extension Point: CustomStringConvertible {
     var description: String {
@@ -112,6 +121,12 @@ struct Grid<T: Sendable> {
 
     func visualize(with transform: (T) -> String) -> String {
         grid.map { $0.map { transform($0) }.joined() }.joined(separator: "\n")
+    }
+}
+
+extension Grid where T == Int {
+    static func emptySquare(of size: Int) -> Self {
+        Self(grid: Array(repeating: Array(repeating: 0, count: size), count: size))
     }
 }
 
