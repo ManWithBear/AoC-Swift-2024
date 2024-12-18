@@ -118,3 +118,13 @@ struct Grid<T: Sendable> {
 func numberOfDigits(in number: Int) -> Int {
     String(number).count
 }
+
+extension Set {
+    func flatMap<T: Hashable>(_ transform: (Element) -> [T]) -> Set<T> {
+        var result = Set<T>()
+        for el in self {
+            result.formUnion(transform(el))
+        }
+        return result
+    }
+}
