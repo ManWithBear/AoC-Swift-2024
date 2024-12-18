@@ -26,12 +26,8 @@ struct Day18: AdventDay {
         }
     }
 
-    // Replace this with your solution for the first part of the day's challenge.
-    func part1() -> Any {
-        var grid = Grid.emptySquare(of: size)
-        for drop in drops.prefix(firstDrop) {
-            grid[drop] = Int.max
-        }
+    func solve(grid: Grid<Int>) -> Int? {
+        var grid = grid
         grid[start] = 1
         var queue = Deque<Point>([start])
         while let current = queue.popFirst() {
@@ -45,11 +41,30 @@ struct Day18: AdventDay {
                 }
             }
         }
-        return -1
+        return nil
+    }
+
+    // Replace this with your solution for the first part of the day's challenge.
+    func part1() -> Any {
+        var grid = Grid.emptySquare(of: size)
+        for drop in drops.prefix(firstDrop) {
+            grid[drop] = Int.max
+        }
+        return solve(grid: grid)!
     }
 
     // Replace this with your solution for the second part of the day's challenge.
     func part2() -> Any {
-        -1
+        var grid = Grid.emptySquare(of: size)
+        for drop in drops.prefix(firstDrop) {
+            grid[drop] = Int.max
+        }
+        for drop in drops.dropFirst(firstDrop) {
+            grid[drop] = Int.max
+            if solve(grid: grid) == nil {
+                return "\(drop.x),\(drop.y)"
+            }
+        }
+        return "-1"
     }
 }
