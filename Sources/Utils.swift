@@ -64,6 +64,14 @@ struct Point: Hashable {
             Point(x: x, y: y + 1),
         ]
     }
+    // neighbors reachable in 2 steps
+    var doubleNeighbors: [Point] {
+        [
+            Point(x: x - 1, y: y - 1), Point(x: x, y: y - 2), Point(x: x + 1, y: y - 1),
+            Point(x: x - 2, y: y), Point(x: x + 2, y: y),
+            Point(x: x - 1, y: y + 1), Point(x: x, y: y + 2), Point(x: x + 1, y: y + 1),
+        ]
+    }
 }
 extension Point: CustomStringConvertible {
     var description: String {
