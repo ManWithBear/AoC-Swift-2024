@@ -26,7 +26,6 @@ struct Day22Tests {
             2024
             """
         let challenge = Day22(data: testData)
-        let bestSequence = "-2,1,-1,3"
         #expect(String(describing: challenge.part2()) == "23")
     }
 }
