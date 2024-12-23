@@ -56,6 +56,10 @@ struct Point: Hashable {
         Point(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
     }
 
+    static func - (lhs: Point, rhs: Point) -> Point {
+        Point(x: lhs.x - rhs.x, y: lhs.y - rhs.y)
+    }
+
     var neighbors4: [Point] {
         [
             Point(x: x - 1, y: y),
@@ -144,6 +148,13 @@ func numberOfDigits(in number: Int) -> Int {
 
 extension Set {
     func flatMap<T: Hashable>(_ transform: (Element) -> [T]) -> Set<T> {
+        var result = Set<T>()
+        for el in self {
+            result.formUnion(transform(el))
+        }
+        return result
+    }
+    func unionMap<T: Hashable>(_ transform: (Element) -> Set<T>) -> Set<T> {
         var result = Set<T>()
         for el in self {
             result.formUnion(transform(el))
