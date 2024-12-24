@@ -72,8 +72,107 @@ struct Day21: AdventDay {
             .reduce(0, +)
     }
 
-    // Replace this with your solution for the second part of the day's challenge.
+    func typeNumerical(code: String) -> [[String: Int]] {
+        let deadZone = Point(x: 0, y: 3)
+        var lastPoint = numberKeypad["A"]!
+        var results: [[String: Int]] = [[:]]
+        for character in code {
+            let point = numberKeypad[character]!
+            let delta = point - lastPoint
+            let horizontalChar = delta.x < 0 ? "<" : ">"
+            let horizontal = String(repeating: horizontalChar, count: abs(delta.x))
+            let verticalChar = delta.y < 0 ? "^" : "v"
+            let vertical = String(repeating: verticalChar, count: abs(delta.y))
+            var newResults: [[String: Int]] = []
+            let hitDeadZoneWhenMovingVertically = lastPoint.x == deadZone.x && point.y == deadZone.y
+            let hitDeadZoneWhenMovingHorizontally =
+                lastPoint.y == deadZone.y && point.x == deadZone.x
+            if !hitDeadZoneWhenMovingVertically {
+                newResults += results.map {
+                    var dict = $0
+                    dict[vertical + horizontal + "A", default: 0] += 1
+                    return dict
+                }
+            }
+            if !hitDeadZoneWhenMovingHorizontally {
+                newResults += results.map {
+                    var dict = $0
+                    dict[horizontal + vertical + "A", default: 0] += 1
+                    return dict
+                }
+            }
+            results = newResults
+            lastPoint = point
+        }
+        return results
+    }
+
+    nonisolated(unsafe) static var memo: [String: [String: Int]] = [:]
+    func typeDirectional(code: String) -> [String: Int] {
+        if let res = Self.memo[code] {
+            return res
+        }
+        var lastPoint = directionalKeypad["A"]!
+        var result: [String: Int] = [:]
+        for character in code {
+            let point = directionalKeypad[character]!
+            defer { lastPoint = point }
+            let delta = point - lastPoint
+            let horizontalChar = delta.x < 0 ? "<" : ">"
+            let horizontal = String(repeating: horizontalChar, count: abs(delta.x))
+            let verticalChar = delta.y < 0 ? "^" : "v"
+            let vertical = String(repeating: verticalChar, count: abs(delta.y))
+
+            if lastPoint == Point(x: 0, y: 1) {
+                result[horizontal + vertical + "A", default: 0] += 1
+                continue
+            }
+            if character == "<" {
+                result[vertical + horizontal + "A", default: 0] += 1
+                continue
+            }
+            // https://www.reddit.com/r/adventofcode/comments/1hjgyps/2024_day_21_part_2_i_got_greedyish/
+            // I was lazy to check this rules myself
+            switch (delta.x, delta.y) {
+            case (_, 0), (0, _):
+                result[horizontal + vertical + "A", default: 0] += 1
+            case (..<0, ..<0):  // up-left
+                result[horizontal + vertical + "A", default: 0] += 1
+            case (..<0, 1...):  // down-left
+                result[horizontal + vertical + "A", default: 0] += 1
+            case (1..., 1...):  // down-right
+                result[vertical + horizontal + "A", default: 0] += 1
+            case (1..., ..<0):  // up-right
+                result[vertical + horizontal + "A", default: 0] += 1
+            default:
+                fatalError("It's impossible")
+            }
+        }
+        Self.memo[code] = result
+        return result
+    }
+
     func part2() -> Any {
-        -1
+        var sum = 0
+        for (code, number) in zip(codes, numericCodes) {
+            let length = typeNumerical(code: code).map { commands in
+                var commands = commands
+                for _ in 0..<25 {
+                    var newCommands: [String: Int] = [:]
+                    for (command, count) in commands {
+                        let d = typeDirectional(code: command)
+                        for (key, value) in d {
+                            newCommands[key, default: 0] += value * count
+                        }
+                    }
+                    commands = newCommands
+                }
+                return commands
+            }
+            .map { $0.reduce(0) { $0 + $1.key.count * $1.value } }
+            .min()!
+            sum += number * length
+        }
+        return sum
     }
 }
