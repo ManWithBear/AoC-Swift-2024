@@ -25,11 +25,17 @@ struct Day24: AdventDay {
     // Save your data in a corresponding text file in the `Data` directory.
     var data: String
     var initialCircuit: Circuit
+    var rawRules: [String: (String, String, String)] = [:]
 
     nonisolated(unsafe) static let op = [
         "AND": { $0 && $1 },
         "OR": { $0 || $1 },
         "XOR": { $0 != $1 },
+    ]
+    static let rawOp = [
+        "AND": "&",
+        "OR": "|",
+        "XOR": "^",
     ]
 
     init(data: String) {
@@ -61,6 +67,7 @@ struct Day24: AdventDay {
             if result.hasPrefix("z") {
                 outputs.insert(result)
             }
+            self.rawRules[result] = (lhs, Self.rawOp[String(parts[1])]!, rhs)
         }
         self.initialCircuit = Circuit(values: values, outputs: outputs.sorted(), rules: rules)
     }
@@ -73,6 +80,42 @@ struct Day24: AdventDay {
 
     // Replace this with your solution for the second part of the day's challenge.
     func part2() -> Any {
-        -1
+        var rawRules = self.rawRules
+        func swap(_ node1: String, _ node2: String) {
+            let node1Rule = rawRules[node1]!
+            let node2Rule = rawRules[node2]!
+            rawRules[node1] = node2Rule
+            rawRules[node2] = node1Rule
+        }
+        swap("dhg", "z06")
+        swap("bhd", "z23")
+        swap("nbf", "z38")
+        swap("dpd", "brk")
+        // bhd,brk,dhg,dpd,nbf,z06,z23,z38
+
+        var mappedNames: [String: String] = [:]
+        func map(name: String) -> String {
+            if let mapped = mappedNames[name] {
+                return mapped
+            }
+            if let (lhs, op, rhs) = rawRules[name] {
+                let tmp = [map(name: lhs), map(name: rhs)].sorted()
+                let newName = "(\(tmp[1])\(op)\(tmp[0]))"
+                mappedNames[name] = newName
+                return newName
+            }
+            mappedNames[name] = name
+            return name
+        }
+        for output in initialCircuit.outputs.sorted() {
+            _ = map(name: output)
+            print("\(output): \(mappedNames[output]!)")
+        }
+
+        for name in mappedNames.keys.sorted() {
+            if name.hasPrefix("z") || name.hasPrefix("x") || name.hasPrefix("y") { continue }
+            print("\(name): \(mappedNames[name]!)")
+        }
+        return -1
     }
 }
